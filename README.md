@@ -6,14 +6,14 @@ A parser for an ultra simplistic data tree, perfect for config files, etc
 Usage
 -----
 
-		justdata.parse(file, options)
+    justdata.parse(file, options)
 
 Example
 -------
 
     jd = require 'justdata'
-		
-		tree = jd.parse fs.readFileSync('./config', 'utf-8')
+    
+    tree = jd.parse fs.readFileSync('./config', 'utf-8')
 
 Source file syntax
 ------------------
