@@ -3,58 +3,145 @@ justdata
 
 A parser for an ultra simplistic data tree, perfect for config files, etc
 
-File syntax
------------
+Usage
+-----
+
+		justdata.parse(file, options)
+
+Example
+-------
+
+    jd = require 'justdata'
+		
+		tree = jd.parse fs.readFileSync('./config', 'utf-8')
+
+Source file syntax
+------------------
 
     field
       value
+    some_field
+      some_value
+      some_other_value
     field2 
       nested_field
         nested_value
+      nested_field
+        nested_value2
       value2
+      another_nested_field
+        hey_yo
+        wazzup
 
 The indentation can be either tabs or spaces of any length and combination, 
 as long as it is consistent within a block.
 
-Example CoffeeScript use
-------------------------
+Using the above script to parse this will result in the following trees,
+depending on options given
 
-    fs = require 'fs'
-    jd = require './justdata'
-    
-    tree = jd.parse fs.readFileSync './myconfig', 'utf-8'
+__{}__ (defaults)
 
-Results in the following structure
+not ordered, not combined, not ignored
 
     tree = {
       field: 'value',
       field2: [
-        { nested_field: nested_value },
-        'value2'
-      ]
+        { nested_field: 'nested_value' },
+        { nested_field: 'nested_value2' },
+        'value2',
+        { another_nested_field: [ 'hey_yo', 'wazzup' ] }
+      ],
+      some_field: [ 'some_value', 'some_other_value' ]
     }
 
-As you can see, it joins together all name->value pairs that are siblings 
-only to other name->value pairs, into a common object.
+__{ ordered: true }__
 
-This behaviour can be prevented by using `jd.parseOrdered` instead of 
-`jd.parse`. If that had been used in the example, the resulting tree would 
-instead be
+ordered (preserves the element order), not combined, not ignored
 
     tree = [
-      { field: value },
+      { field: 'value' },
+      { some_field: [ 'some_value', 'some_other_value' ] },
       { field2: [
-        { nested_field: nested_value },
-        'value2'
+        { nested_field: 'nested_value' },
+        { nested_field: 'nested_value2' },
+        'value2',
+        { another_nested_field: [ 'hey_yo', 'wazzup' ] }
       ] }
     ]
 
+__{ ordered: true, combined: true }__
 
-You can also expand on the join behaviour rather than limit it, by using 
-`jd.parseCombine`. That will join all name->value pairs together in a 
-common object as the first item in the block array, but will leave all 
-values ordered as they would have been, without interspersed name->value 
-pairs.
+not ordered (combined takes precedence), combined (combines key-value
+elements into a common object), not ignored
+
+Note `tree.field2` as well as `tree.field2.nested_field`
+
+    tree = {
+      field: 'value',
+      field2: [
+        {
+          nested_field: [ 'nested_value', 'nested_value2' ],
+          another_nested_field: [ 'hey_yo', 'wazzup' ]
+        },
+        'value2'
+      ],
+      some_field: [ 'some_value', 'some_other_value' ]
+    }
+
+__{ ordered: true, ignored: true }__
+
+ordered, not combined, ignored (ignores values that have key-value
+siblings)
+
+Note `tree.field2`'s value2 is ignored.
+
+    tree = [
+      { field: 'value' },
+      { some_field: [ 'some_value', 'some_other_value' ] },
+      { field2: [
+        { nested_field: 'nested_value' },
+        { nested_field: 'nested_value2' },
+        { another_nested_field: [ 'hey_yo', 'wazzup' ] }
+      ] }
+    ]
+
+__{ combined: true, ignored: true }__
+
+not ordered (combined takes precedence), combined, ignored
+
+The combined flag is actually not necessary here, since combining is
+automatic when there are no value-only siblings, which ignored takes
+care of.
+
+Note `tree.field2`'s value2 is ignored, and every level is an object
+unless it has values only. This is a nice option for config files.
+
+    tree = {
+      field: 'value',
+      field2: {
+        another_nested_field: [ 'hey_yo', 'wazzup' ],
+        nested_field: [ 'nested_value', 'nested_value2' ]
+      },
+      some_field: [ 'some_value', 'some_other_value' ]
+    }
+
+__{ levels: 0 }__
+
+parse only the root level and return everything else as raw text
+
+    tree = {
+      field: 'value',
+      some_field: 'some_value
+    some_other_value',
+      field2: 'nested_field
+      nested_value
+    nested_field
+      nested_value2
+    value2
+    another_nested_field
+      hey_yo
+      wazzup'
+    }
 
 Simplified BSD License
 ----------------------
