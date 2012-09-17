@@ -1,57 +1,57 @@
-exports.parse = (file, options) ->
-	options          = options || {}
-	options.combined = !!options.combined
-	options.ordered  = !!options.ordered
-	options.ignored  = !!options.ignored
-	levels           = -1 if typeof options.levels == 'undefined'
-	
-	file = file.replace /\s*[\r\n]+(\s+[\r\n]+)?/, '\n'
-	file = file.replace /\s*[\r\n\s]+$/, ''
-	
-	return parseBlock file, options, '', levels
+# Fuck scanners and lexers. Let's regex this bitch.
 
-parseBlock = (block, options, indent, levels) ->
-	# split the block at the head of every element on this indent level
-	block = block.split new RegExp "\\n#{ indent }(?=\\S)"
-	console.log "L16: #{ JSON.stringify(block) }"
-	array = []
+exports.parse = (file, levels = -1) ->
+	file = file.trim().replace(/[\r\n]+/, '\n')
+	
+	return parseBlock file, levels
+
+parseBlock = (block, levels) ->	
+	# split by top level elements
+	elements = block.split /[\n\s]*\n(?=\S)/
+	
+	# parse elements' name-value pairs and store in
 	object = {}
-	for element in block
-		# split the element lines and remove parent indent level
-		element = element.split new RegExp "\\n#{ indent }"
-		# consume the parent line
-		head = element.shift().trim()
-		unless element.length # it's a leaf
-			array.push head
-			console.log "L26: #{head}"
-			continue
-		[newindent] = element[0].match /\s+/
-		element[0] = element[0].substr newindent.length
-		element = element.join '\n'
-		levels--
-		#if levels
-		element = parseBlock element, options, newindent, levels
-		#else
-		#	element = element.split new RegExp "\\n#{ newindent }"
-		#	element = element.join '\n'
-		console.log "L33: #{head}: #{JSON.stringify(element)}"
-		if object[head]
-			unless object[head] instanceof Array
-				object[head] = [object[head]]
-			object[head].push element
+	array = []
+	for element in elements
+		[name, value] = parseElement element, levels
+		unless value
+			array.push name
 		else
-			object[head] = element
-		if options.ordered || !options.combined
-			obj = {}
-			obj[head] = element
-			array.push obj
-	if options.ignored && Object.keys(object).length
-		array = [item for item in array when typeof item != 'string']
-	if options.combined || !options.ordered
-		array = [item for item in array when typeof item == 'string']
-		array.unshift object if Object.keys(object).length
-	unless array.length # if array is empty, then there must be objects
-		return object
-	unless 1 < array.length # don't return as array if there are no siblings
-		return array[0]
-	return array
+			object[name] = value
+	
+	if array.length
+		if Object.keys(object).length
+			object._ = if array[1] then array else array[0]
+		else
+			return if array[1] then array else array[0]
+	return object
+
+parseElement = (element, levels) ->
+	# split the element at newlines
+	items = element.split /[\n\s]*\n/
+	
+	# then remove the first line, which is the header
+	header = items.shift().trim()
+	
+	# if there are no children, return empty array
+	return [header, false] unless items.length
+	
+	# there are children, find indent level
+	indent = items[0].match /^\s+(?=\S)/
+	indent = indent[0]
+	
+	# then strip the current indent from all elements
+	elements = []
+	for item in items
+		if !item.indexOf indent # indent is at pos 0
+			elements.push item.substr indent.length
+		else # incorrect format
+			throw new Error "Bad indentation at '#{item}'"
+		
+	elements = elements.join '\n'
+	
+	# do we parse the children as well?
+	unless levels # no
+		return [header, elements]
+	else # yes
+		return [header, parseBlock elements, --levels]
