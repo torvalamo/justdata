@@ -1,4 +1,7 @@
+#!/usr/bin/node
 // node test.js <file_name> [levels]
+// or
+// ./test.js <file_name> [levels]
 
 var jd = require('./justdata')
 var fs = require('fs')
