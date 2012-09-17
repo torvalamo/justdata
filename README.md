@@ -57,9 +57,9 @@ Or with levels set to default (unlimited)
         nested_field: 'nested_value2',
         another_nested_field: {
           hey_yo: 'bro',
-          \_: 'wazzup'
+          _: 'wazzup'
         },
-        \_: 'value2'
+        _: 'value2'
       }
     }
 
