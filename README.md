@@ -63,6 +63,8 @@ Or with levels set to default (unlimited)
       }
     }
 
+Note that `field2.nested_field` only contains the second instance. Identical names will be overwritten by the last instance.
+
 Simplified BSD License
 ----------------------
 
