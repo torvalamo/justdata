@@ -65,6 +65,11 @@ Or with levels set to default (unlimited)
 
 Note that `field2.nested_field` only contains the second instance. Identical names will be overwritten by the last instance.
 
+A couple of things to note:
+
+- Multiple values in the same block are put in an array.
+- In blocks that have both value(s) and further nested elements, the value(s) will be stored with the identifier `_`, e.g. `block._`.
+
 Simplified BSD License
 ----------------------
 
