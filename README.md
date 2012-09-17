@@ -6,7 +6,7 @@ A parser for an ultra simplistic data tree, perfect for config files, etc
 Usage
 -----
 
-    justdata.parse(file, levels = 0)
+    justdata.parse(file, levels = -1)
 
 Example
 -------
@@ -22,6 +22,7 @@ Source file syntax
     some_field
       some_value
       some_other_value
+    
     field2 
       nested_field
         nested_value
@@ -35,6 +36,8 @@ Source file syntax
 
 The indentation can be either tabs or spaces of any length and combination, 
 as long as it is consistent within a block.
+
+Blank or whitespace-only lines are ignored, as is trailing whitespace.
 
 Using the above script to parse this will result in the following tree,
 with `levels` set to 0 (parse only root level)
