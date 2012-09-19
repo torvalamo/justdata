@@ -1,7 +1,15 @@
 justdata
 ========
 
-A parser for an ultra simplistic data tree, perfect for config files, etc
+The file contains _just data_ (see below). Plus minimal indentation to indicate a hierarchy.
+Exactly like most hierarchies are actually displayed on computers today.
+But for some reason we feel the need to make really complicated config files
+that take longer to learn than the actual product, _and are hard to read_.
+
+I'm surprised this format isn't more common in config files, or even other key-value storage.
+
+If you're a clever person, please try to optimize the parser, and send me a pull request.
+At the moment it's a quick and dirty hack that doesn't look pretty, but it works like it should.
 
 Usage
 -----
@@ -63,12 +71,11 @@ Or with levels set to default (unlimited)
       }
     }
 
-Note that `field2.nested_field` only contains the second instance. Identical names will be overwritten by the last instance.
-
 A couple of things to note:
 
-- Multiple values in the same block are put in an array.
-- In blocks that have both value(s) and further nested elements, the value(s) will be stored with the identifier `_`, e.g. `block._`.
+- Identical names ("name" = item that has children) will be overwritten by the last instance (`field2.nested_field` only contains the second instance).
+- Multiple values ("value" = item that has no children) in the same block are put in an array (`some_field`).
+- In blocks that have both value(s) and name(s), the value(s) will be stored with the identifier `_` (`field2._`).
 
 Simplified BSD License
 ----------------------
