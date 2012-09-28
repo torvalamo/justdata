@@ -47,13 +47,16 @@ as long as it is consistent within a block.
 
 Blank or whitespace-only lines are ignored, as is trailing whitespace.
 
+Parsed
+------
+
 Using the above script to parse this will result in the following tree,
 with `levels` set to 0 (parse only root level)
 
     tree = [ 
       field: 'value',
       some_field: 'some_value\nsome_other_value',
-      field2: 'nested_field\n  nested_value\nvalue, with, commas\nnested_field\n  nested_value2\nvalue2\nanother_nested_field\n  hey_yo\n   bro\n  wazzup\nnother value with spaces' 
+      field2: 'nested_field\n  nested_value\nsome, value, with, commas\nnested_field\n  nested_value2\nvalue2\nanother_nested_field\n  hey_yo\n   bro\n  wazzup\nanother value with spaces' 
     ]
 
 Or with levels set to default (-1, unlimited)
@@ -74,6 +77,9 @@ Or with levels set to default (-1, unlimited)
         ] 
       ] 
     ]
+
+Caveats and good to know
+------------------------
 
 The structure is a javascript array object, which also exploits the fact that arrays 
 are obects like much else, so it can have properties with names.
