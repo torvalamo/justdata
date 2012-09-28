@@ -26,7 +26,6 @@ parse = (block, levels) ->
 				throw new Error "length is a reserved word and cannot be used as a name"
 			# find indent of children
 			indent = items[0].match(/^\s+(?=\S)/)[0]
-			console.log "l26: indent '#{indent}'"
 			element = []
 			# strip the current indent from children
 			for item in items

@@ -28,7 +28,6 @@
           throw new Error("length is a reserved word and cannot be used as a name");
         }
         indent = items[0].match(/^\s+(?=\S)/)[0];
-        console.log("l26: indent '" + indent + "'");
         element = [];
         for (_j = 0, _len1 = items.length; _j < _len1; _j++) {
           item = items[_j];
