@@ -6,13 +6,11 @@ Exactly like most hierarchies are actually displayed on computers today.
 But for some reason we feel the need to make really complicated config files
 that take longer to learn than the actual product, _and are hard to read_.
 
-I'm surprised this format isn't more common in config files, or even other key-value storage.
-
 If you're a clever person, please try to optimize the parser, and send me a pull request.
 At the moment it's a quick and dirty hack that doesn't look pretty, but it works like it should.
 
-Usage
------
+Definition
+----------
 
     justdata.parse(file, levels = -1)
 
@@ -34,6 +32,7 @@ Source file syntax
     field2 
       nested_field
         nested_value
+      some, value, with, commas
       nested_field
         nested_value2
       value2
@@ -41,6 +40,7 @@ Source file syntax
         hey_yo
           bro
         wazzup
+      another value with spaces
 
 The indentation can be either tabs or spaces of any length and combination, 
 as long as it is consistent within a block.
@@ -50,32 +50,47 @@ Blank or whitespace-only lines are ignored, as is trailing whitespace.
 Using the above script to parse this will result in the following tree,
 with `levels` set to 0 (parse only root level)
 
-    tree = {
+    tree = [ 
       field: 'value',
       some_field: 'some_value\nsome_other_value',
-      field2: 'nested_field\n  nested_value\nnested_field\n  nested_value2\nvalue2\nanother_nested_field\n  hey_yo\n   bro\n  wazzup'
-    }
+      field2: 'nested_field\n  nested_value\nvalue, with, commas\nnested_field\n  nested_value2\nvalue2\nanother_nested_field\n  hey_yo\n   bro\n  wazzup\nnother value with spaces' 
+    ]
 
-Or with levels set to default (unlimited)
+Or with levels set to default (-1, unlimited)
 
-    tree = {
-      field: 'value',
+    tree = [ 
+      field: [ 'value' ],
       some_field: [ 'some_value', 'some_other_value' ],
-      field2: {
-        nested_field: 'nested_value2',
-        another_nested_field: {
-          hey_yo: 'bro',
-          _: 'wazzup'
-        },
-        _: 'value2'
-      }
-    }
+      field2: [ 
+        'some, value, with, commas',
+        'value2',
+        'another value with spaces',
+        nested_field: [ 'nested_value2' ],
+        another_nested_field: [ 
+          'wazzup', 
+          hey_yo: [ 
+            'bro' 
+          ] 
+        ] 
+      ] 
+    ]
 
-A couple of things to note:
+The structure is a javascript array object, which also exploits the fact that arrays 
+are obects like much else, so it can have properties with names.
 
-- Identical names ("name" = item that has children) will be overwritten by the last instance (`field2.nested_field` only contains the second instance).
-- Multiple values ("value" = item that has no children) in the same block are put in an array (`some_field`).
-- In blocks that have both value(s) and name(s), the value(s) will be stored with the identifier `_` (`field2._`).
+All the default array prototype functions have been removed from these objects in
+order to prevent name crashes. If you want to modify the array (e.g. using shift 
+to retreive the next item) you will have to use `Array.prototype.shift.call(tree.field2)`
+or `[].shift.call(tree.field2)`. Thus, the only reserved word is 'length' (because 
+it is required for array functionality), and it can only be used as a value, not as
+a key.
+
+Note that names that are identical on the same level (`field2.nested_field`) will 
+overwrite each other, in the order they appear.
+
+There will come an option which lets you specify whether to parse 'some, value, with, commas'
+as if they were elements separated by commas instead of newlines, and siblings to 'value2'
+and 'another value with spaces'.
 
 Simplified BSD License
 ----------------------

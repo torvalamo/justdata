@@ -8,6 +8,7 @@ field2
   nested_field
 
     nested_value  
+  some, value, with, commas
   nested_field
     nested_value2
   value2 
@@ -15,3 +16,4 @@ field2
     hey_yo
      bro
     wazzup
+  another value with spaces
